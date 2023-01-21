@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "server.js",
 	"scripts": {
-		"test": "tsc && node server.js"
+		"test": "node server.js"
 	},
 	"author": "Zed",
 	"license": "MIT",
