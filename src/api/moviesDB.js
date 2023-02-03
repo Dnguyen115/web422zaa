@@ -58,6 +58,7 @@ class MoviesDB {
             return;
         }
         this.database = mongoose_1.default.createConnection(connectionString, {});
+        this.database = this.database.useDb("sample_mflix");
         this.movies = this.database.model("movies", movieSchema);
     }
     getStatus() {
