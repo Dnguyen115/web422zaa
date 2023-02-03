@@ -134,7 +134,7 @@ class MoviesDB {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
                 if (this.movies)
-                    resolve(this.movies.deleteOne({ _id: id }).exec());
+                    resolve(this.movies.findByIdAndDelete(id).exec());
                 else
                     reject(new Error("Model is invalid!"));
             });

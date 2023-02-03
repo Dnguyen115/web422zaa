@@ -156,7 +156,7 @@ export default class MoviesDB {
 
 	async deleteMovieById(id: string) {
 		return new Promise<object>((resolve, reject) => {
-			if (this.movies) resolve(this.movies.deleteOne({ _id: id }).exec());
+			if (this.movies) resolve(this.movies.findByIdAndDelete(id).exec());
 			else reject(new Error("Model is invalid!"));
 		});
 	}
