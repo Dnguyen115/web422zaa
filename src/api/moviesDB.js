@@ -1,4 +1,5 @@
 "use strict";
+// ! Optimized import from compiler
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -76,7 +77,11 @@ class MoviesDB {
     getAllMovies(page = 1, perPage = 20, title = "") {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
-                let findBy = title.length > 0 ? { title } : {};
+                let findBy = {};
+                if (title == null)
+                    findBy = {};
+                else
+                    findBy = title.length > 0 ? { title: title } : {};
                 if (this.movies) {
                     if (+page && +perPage) {
                         resolve(this.movies
