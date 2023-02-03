@@ -92,7 +92,6 @@ export default class MoviesDB {
 		}
 
 		this.database = mongoose.createConnection(connectionString, {});
-		this.database = this.database.useDb("sample_mflix");
 		this.movies = this.database.model<IMovie>("movies", movieSchema);
 	}
 
