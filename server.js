@@ -16,12 +16,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // ! Optimized import from compiler
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
+const cors_1 = __importDefault(require("cors"));
 const moviesDB_1 = __importDefault(require("./src/api/moviesDB"));
 // ! Optimized import from compiler
 require("dotenv").config();
 const app = (0, express_1.default)();
 const HTTP_PORT = process.env.PORT || 8080;
 const db = new moviesDB_1.default(process.env.MONGODB_CONN_STRING ? process.env.MONGODB_CONN_STRING : "");
+app.use((0, cors_1.default)());
 app.use(body_parser_1.default.json());
 app.use(express_1.default.json());
 app.get("/", (req, res) => {
@@ -52,7 +54,6 @@ app.put("/api/movies/:id", (req, res) => {
     });
 });
 app.delete("/api/movies/:id", (req, res) => {
-    console.log(req.params.id);
     db.deleteMovieById(req.params.id).then((obj) => {
         res.json(obj);
     }, (err) => {

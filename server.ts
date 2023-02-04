@@ -14,6 +14,7 @@
 import express from "express";
 import path from "path";
 import bodyParser from "body-parser";
+import cors from "cors";
 import movdb from "./src/api/moviesDB";
 
 // ! Optimized import from compiler
@@ -24,6 +25,7 @@ const app = express();
 const HTTP_PORT = process.env.PORT || 8080;
 const db = new movdb(process.env.MONGODB_CONN_STRING ? process.env.MONGODB_CONN_STRING : "");
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
