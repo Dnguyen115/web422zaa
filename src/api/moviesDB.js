@@ -1,5 +1,28 @@
 "use strict";
 // ! Optimized import from compiler
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9,18 +32,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importDefault(require("mongoose"));
-const movieSchema = new mongoose_1.default.Schema({
+const mongoose_1 = __importStar(require("mongoose"));
+// ! Optimized import from compiler
+const movieSchema = new mongoose_1.Schema({
     plot: String,
     genres: [String],
     runtime: Number,
     cast: [String],
     num_mflix_comments: Number,
-    posters: String,
+    poster: String,
     title: String,
     fullplot: String,
     languages: [String],
@@ -53,23 +74,25 @@ const movieSchema = new mongoose_1.default.Schema({
 });
 class MoviesDB {
     constructor(connectionString) {
+        this.connStr = "";
         if (connectionString.length <= 0) {
             console.error("MoviesDB requires a valid connection string");
             return;
         }
-        this.database = mongoose_1.default.createConnection(connectionString, {});
-        this.movies = this.database.model("movies", movieSchema);
+        this.connStr = connectionString;
     }
-    getStatus() {
+    initialize() {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
-                var _a;
-                if (this.database)
-                    resolve(this.database.readyState);
-                else
-                    reject(new Error("Database not connected"));
-                (_a = this.database) === null || _a === void 0 ? void 0 : _a.once("error", (err) => {
+                const db = mongoose_1.default.createConnection(this.connStr, {});
+                db.once("error", (err) => {
                     reject(err);
+                });
+                db.once("open", () => {
+                    this.movies = db.model("movies", movieSchema);
+                    resolve({
+                        message: "success"
+                    });
                 });
             });
         });
@@ -120,11 +143,11 @@ class MoviesDB {
             });
         });
     }
-    updateMovieById(data, id) {
+    updateMovieById(id, data) {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
                 if (this.movies)
-                    resolve(this.movies.updateOne({ _id: id }, { $set: data }).exec());
+                    resolve(this.movies.findByIdAndUpdate(id, data).exec());
                 else
                     reject(new Error("Model is invalid!"));
             });
@@ -133,8 +156,9 @@ class MoviesDB {
     deleteMovieById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
+                console.log(id);
                 if (this.movies)
-                    resolve(this.movies.findByIdAndDelete(id).exec());
+                    resolve(this.movies.deleteOne({ _id: id }).exec());
                 else
                     reject(new Error("Model is invalid!"));
             });

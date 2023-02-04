@@ -5,51 +5,13 @@ import mongoose, { Schema, Model, model, connect } from "mongoose";
 
 // ! Optimized import from compiler
 
-interface IMovie {
-	plot: string;
-	genres: string[];
-	runtime: number;
-	cast: string[];
-	num_mflix_comments: number;
-	posters: string;
-	title: string;
-	fullplot: string;
-	languages: string[];
-	released: Date;
-	directors: string[];
-	rated: string;
-	awards: {
-		wins: number;
-		nominations: number;
-		text: string;
-	};
-	lastupdated: Date;
-	year: number;
-	imdb: {
-		rating: number;
-		votes: number;
-		id: number;
-	};
-	countries: string[];
-	type: string;
-	tomatoes: {
-		viewer: {
-			rating: number;
-			numReviews: number;
-			meter: number;
-		};
-		dvd: Date;
-		lastUpdated: Date;
-	};
-}
-
-const movieSchema = new mongoose.Schema<IMovie>({
+const movieSchema = new Schema({
 	plot: String,
 	genres: [String],
 	runtime: Number,
 	cast: [String],
 	num_mflix_comments: Number,
-	posters: String,
+	poster: String,
 	title: String,
 	fullplot: String,
 	languages: [String],
@@ -82,8 +44,8 @@ const movieSchema = new mongoose.Schema<IMovie>({
 });
 
 export default class MoviesDB {
-	database: mongoose.Connection | undefined;
-	movies: mongoose.Model<IMovie> | undefined;
+	connStr: string = "";
+	movies: mongoose.Model<any> | undefined;
 
 	constructor(connectionString: string) {
 		if (connectionString.length <= 0) {
@@ -91,17 +53,24 @@ export default class MoviesDB {
 			return;
 		}
 
-		this.database = mongoose.createConnection(connectionString, {});
-		this.movies = this.database.model<IMovie>("movies", movieSchema);
+		this.connStr = connectionString;
 	}
 
-	async getStatus() {
-		return new Promise<number>((resolve, reject) => {
-			if (this.database) resolve(this.database.readyState);
-			else reject(new Error("Database not connected"));
+	async initialize() {
+		return new Promise((resolve, reject) => {
+			const db = mongoose.createConnection(this.connStr, {});
 
-			this.database?.once("error", (err: any) => {
+			db.once("error", (err) => {
 				reject(err);
+			});
+
+			db.once("open", () => {
+				this.movies = db.model("movies", movieSchema);
+				resolve(
+					{
+						message: "success"
+					}
+				);
 			});
 		});
 	}
@@ -147,16 +116,17 @@ export default class MoviesDB {
 		});
 	}
 
-	async updateMovieById(data: object, id: string) {
+	async updateMovieById(id: string, data: object) {
 		return new Promise<object>((resolve, reject) => {
-			if (this.movies) resolve(this.movies.updateOne({ _id: id }, { $set: data }).exec());
+			if (this.movies) resolve(this.movies.findByIdAndUpdate(id, data).exec());
 			else reject(new Error("Model is invalid!"));
 		});
 	}
 
 	async deleteMovieById(id: string) {
 		return new Promise<object>((resolve, reject) => {
-			if (this.movies) resolve(this.movies.findByIdAndDelete(id).exec());
+			console.log(id)
+			if (this.movies) resolve(this.movies.deleteOne({ _id: id }).exec());
 			else reject(new Error("Model is invalid!"));
 		});
 	}
